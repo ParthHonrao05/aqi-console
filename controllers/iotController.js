@@ -1,4 +1,5 @@
 const Device = require('../models/Device');
+const AqiReading = require('../models/AqiReading');
 
 exports.receiveDeviceData = async (req, res) => {
   try {
@@ -20,6 +21,14 @@ exports.receiveDeviceData = async (req, res) => {
         message: 'Device not registered',
       });
     }
+
+    await AqiReading.create({
+        device: device._id,
+        serialNumber,
+        imei,
+        pm25,
+        pm10,
+    });
 
     console.log('AQI Data received:', {
       serialNumber,
