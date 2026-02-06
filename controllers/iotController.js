@@ -29,6 +29,7 @@ exports.receiveDeviceData = async (req, res) => {
         pm25,
         pm10,
     });
+    console.log('AQI saved to DB');
 
     console.log('AQI Data received:', {
       serialNumber,
