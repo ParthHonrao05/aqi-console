@@ -24,7 +24,11 @@ app.use('/api/iot', require('./routes/iotRoutes'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
-  res.json({ status: 'OK', message: 'AQI Admin Console API is running' });
+  res.status(200).json({
+    status: 'OK',
+    service: 'AQI Admin Console API',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // 404 handler
