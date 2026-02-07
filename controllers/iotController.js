@@ -22,21 +22,16 @@ exports.receiveDeviceData = async (req, res) => {
       });
     }
 
-    await AqiReading.create({
-        device: device._id,
-        serialNumber,
-        imei,
-        pm25,
-        pm10,
-    });
-    console.log('AQI saved to DB');
-
-    console.log('AQI Data received:', {
+    const reading = await AqiReading.create({
+      device: device._id,
       serialNumber,
       imei,
       pm25,
       pm10,
     });
+
+    // 🔥 IMPORTANT LOG
+    console.log('AQI saved to DB:', reading._id);
 
     res.status(200).json({
       message: 'Data received successfully',
