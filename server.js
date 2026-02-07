@@ -21,6 +21,7 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/devices', require('./routes/deviceRoutes'));
 app.use('/api/iot', require('./routes/iotRoutes'));
+app.use('/api/aqi', require('./routes/aqiRoutes'));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
