@@ -121,4 +121,11 @@ export const devicesAPI = {
   createDevice: (deviceData) => api.post('/devices', deviceData),
 };
 
+// AQI API
+export const aqiAPI = {
+  getAqiHistory: (deviceId) =>
+    api.get(`/aqi/${deviceId}`),
+};
+
+
 export default api;

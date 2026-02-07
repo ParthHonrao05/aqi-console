@@ -152,6 +152,11 @@ const Devices = () => {
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 dark:text-gray-100">
                             {device.imeiNumber}
                           </td>
+                          <td>
+                            <button onClick={() => navigate(`/admin/devices/${device._id}/aqi`)}>
+                              View AQI
+                            </button>
+                          </td>
                         </tr>
                       ))
                     )}
