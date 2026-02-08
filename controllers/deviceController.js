@@ -1,4 +1,5 @@
 const Device = require('../models/Device');
+const mqttClient = require("../aws/mqttClient");
 
 // @desc    Create a new device (Admin only)
 // @route   POST /api/devices
@@ -20,6 +21,21 @@ const createDevice = async (req, res) => {
     }
 
     const device = await Device.create({ serialNumber, imeiNumber });
+    const payload = {
+      targetDevice: serialNumber,
+      command: "DEVICE_REGISTERED",
+    };
+    mqttClient.publish(
+      "aqi/devices/broadcast",
+      JSON.stringify(payload), 
+      (err) => {
+        if (err) {
+          console.error("MQTT publish failed:", err.message);
+        } else {
+          console.log(" MQTT message sent:", payload);
+        }
+      }
+    );
 
     res.status(201).json({
       message: 'Device created successfully',

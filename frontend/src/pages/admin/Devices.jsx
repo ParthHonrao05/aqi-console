@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { devicesAPI } from '../../services/api';
 import Layout from '../../components/Layout';
 import ErrorAlert from '../../components/ErrorAlert';
+import { useNavigate } from 'react-router-dom';
 
 const Devices = () => {
   const [devices, setDevices] = useState([]);
@@ -13,6 +14,7 @@ const Devices = () => {
     imeiNumber: '',
   });
   const [submitting, setSubmitting] = useState(false);
+  const navigate = useNavigate()
 
 
   useEffect(() => {
@@ -153,7 +155,8 @@ const Devices = () => {
                             {device.imeiNumber}
                           </td>
                           <td>
-                            <button onClick={() => navigate(`/admin/devices/${device._id}/aqi`)}>
+                            <button onClick={() => navigate(`/admin/devices/${device._id}/aqi`)}
+                               className="ml-4 inline-flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 border border-transparent font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                               View AQI
                             </button>
                           </td>

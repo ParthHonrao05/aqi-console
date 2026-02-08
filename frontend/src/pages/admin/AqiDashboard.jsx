@@ -11,8 +11,8 @@ const AqiDashboard = () => {
   useEffect(() => {
     const fetchReadings = async () => {
       try {
-        const res = await aqiAPI.getDeviceReadings(deviceId);
-        setReadings(res.data);
+        const res = await aqiAPI.getAqiHistory(deviceId);
+        setReadings(res.data.readings || []);
       } catch (err) {
         console.error('Failed to fetch AQI data', err);
       } finally {
@@ -23,7 +23,9 @@ const AqiDashboard = () => {
     fetchReadings();
   }, [deviceId]);
 
-  if (loading) return <p>Loading AQI data...</p>;
+  if (loading) return <p className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6">
+    Loading AQI data...
+  </p>;
 
   return (
     <Layout>
@@ -46,7 +48,7 @@ const AqiDashboard = () => {
                                         PM10
                                     </th>
                                     <th className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
-                                        Date
+                                        Recieved At
                                     </th>
                                 </tr>
                                 </thead>

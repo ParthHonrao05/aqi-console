@@ -30,7 +30,6 @@ exports.receiveDeviceData = async (req, res) => {
       pm10,
     });
 
-    // 🔥 IMPORTANT LOG
     console.log('AQI saved to DB:', reading._id);
 
     res.status(200).json({
