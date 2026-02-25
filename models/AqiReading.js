@@ -15,8 +15,10 @@ const aqiReadingSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    pm25: Number,
-    pm10: Number,
+    aqi: {
+      type: Number,
+      required: true,
+    }
   },
   {
     timestamps: true, // createdAt & updatedAt auto

@@ -12,13 +12,15 @@ const createClient = async (req, res) => {
       return res.status(400).json({ errors: errors.array() });
     }
 
-    const { username, email, password } = req.body;
+    const { username, companyName, email, password } = req.body;
 
+    if (!username || !companyName || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
     // Check if user already exists
     const existingUser = await User.findOne({
       $or: [{ email }, { username }],
     });
-
     if (existingUser) {
       return res.status(400).json({
         message: 'User with this email or username already exists',
@@ -28,6 +30,7 @@ const createClient = async (req, res) => {
     // Create client user (role is set to CLIENT by default in schema)
     const user = await User.create({
       username,
+      companyName,
       email,
       password,
       role: 'CLIENT',
@@ -38,6 +41,7 @@ const createClient = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
+        companyName: user.companyName,
         email: user.email,
         role: user.role,
       },
@@ -110,14 +114,14 @@ const deleteClient = async (req, res) => {
 // @access  Private/Admin
 const createAdmin = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { companyName, email, password } = req.body;
 
-    if (!username || !email || !password) {
+    if (!companyName || !email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
     const existingUser = await User.findOne({
-      $or: [{ email }, { username }],
+      $or: [{ email }, { companyName }],
     });
 
     if (existingUser) {
@@ -127,7 +131,7 @@ const createAdmin = async (req, res) => {
     }
 
     const admin = await User.create({
-      username,
+      companyName,
       email,
       password,
       role: 'ADMIN',
@@ -137,7 +141,7 @@ const createAdmin = async (req, res) => {
       message: 'Admin created successfully',
       user: {
         id: admin._id,
-        username: admin.username,
+        username: admin.companyName,
         email: admin.email,
         role: admin.role,
       },
@@ -151,7 +155,7 @@ const createAdmin = async (req, res) => {
 // Update own profile (Admin / Client)
 const updateMyProfile = async (req, res) => {
   try {
-    const { username, password } = req.body;
+    const { username, companyName, password } = req.body;
 
     const user = await User.findById(req.user.id);
     if (!user) {
@@ -159,6 +163,7 @@ const updateMyProfile = async (req, res) => {
     }
 
     if (username) user.username = username;
+    if (companyName) user.companyName = companyName;
     if (password) user.password = password;
 
     await user.save();

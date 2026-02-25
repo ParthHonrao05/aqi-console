@@ -23,7 +23,7 @@ const Login = () => {
     // Redirect if already logged in
     if (isAuthenticated && user) {
       if (user.role === 'ADMIN') {
-        navigate('/admin/clients');
+        navigate("/admin/dashboard");
       } else {
         navigate('/client/devices');
       }
@@ -48,7 +48,7 @@ const Login = () => {
       if (result.success && result.user) {
         // Redirect based on role
         if (result.user.role === 'ADMIN') {
-          navigate('/admin/clients');
+          navigate('/admin/dashboard');
         } else {
           navigate('/client/devices');
         }

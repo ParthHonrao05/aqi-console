@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const connectDB = require('./config/database');
+const http = require('http');
+const { Server } = require('socket.io');
 
 // Load environment variables
 dotenv.config();
@@ -45,6 +47,24 @@ app.use((err, req, res, next) => {
 
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+// Create HTTP server
+const server = http.createServer(app);
+
+// Create Socket.io server
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+  },
+});
+
+// Make io globally accessible
+global.io = io;
+
+// Optional: log when client connects
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+});
+
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });

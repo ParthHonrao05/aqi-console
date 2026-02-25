@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { devicesAPI } from '../../services/api';
+import { devicesAPI, usersAPI } from '../../services/api';
 import Layout from '../../components/Layout';
 import ErrorAlert from '../../components/ErrorAlert';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +9,10 @@ const Devices = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [showAssignModal, setShowAssignModal] = useState(false);
+  const [selectedDeviceId, setSelectedDeviceId] = useState(null);
+  const [selectedClient, setSelectedClient] = useState("");
   const [formData, setFormData] = useState({
     serialNumber: '',
     imeiNumber: '',
@@ -19,6 +23,7 @@ const Devices = () => {
 
   useEffect(() => {
     fetchDevices();
+    fetchClients();
   }, []);
 
   const fetchDevices = async () => {
@@ -35,41 +40,69 @@ const Devices = () => {
       setLoading(false);
     }
   };
+  const fetchClients = async () => {
+    try {
+      const res = await usersAPI.getAllClients();
+      setClients(res.data.clients || []);
+    } catch (err) {
+      console.error("Error fetching clients:", err);
+    }
+  };
+  const openAssignModal = (deviceId) => {
+    setSelectedDeviceId(deviceId);
+    setShowAssignModal(true);
+  };
 
   const handleCreateDevice = async (e) => {
-  e.preventDefault();
-  setSubmitting(true);
-  setError('');
+    e.preventDefault();
+    setSubmitting(true);
+    setError('');
 
-  if (!formData.serialNumber || !formData.imeiNumber) {
-    setError('All fields required');
-    setSubmitting(false);
-    return;
-  }
+    if (!formData.serialNumber || !formData.imeiNumber) {
+      setError('All fields required');
+      setSubmitting(false);
+      return;
+    }
 
-  if (!/^[a-zA-Z0-9]{1,30}$/.test(formData.serialNumber)) {
-    setError('Serial Number must be up to 30 alphanumeric characters');
-    setSubmitting(false);
-    return;
-  }
+    if (!/^[a-zA-Z0-9]{1,30}$/.test(formData.serialNumber)) {
+      setError('Serial Number must be up to 30 alphanumeric characters');
+      setSubmitting(false);
+      return;
+    }
 
-  if (!/^\d{15}$/.test(formData.imeiNumber)) {
-    setError('IMEI must be 15 digits');
-    setSubmitting(false);
-    return;
-  }
+    if (!/^\d{15}$/.test(formData.imeiNumber)) {
+      setError('IMEI must be 15 digits');
+      setSubmitting(false);
+      return;
+    }
 
-  try {
-    await devicesAPI.createDevice(formData);
-    setShowCreateModal(false);
-    setFormData({ serialNumber: '', imeiNumber: '' });
-    await fetchDevices();
-  } catch (err) {
-    setError(err.response?.data?.message || 'Failed to register device');
-  } finally {
-    setSubmitting(false);
-  }
-};
+    try {
+      await devicesAPI.createDevice(formData);
+      setShowCreateModal(false);
+      setFormData({ serialNumber: '', imeiNumber: '' });
+      await fetchDevices();
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to register device');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAssignDevice = async () => {
+    try {
+      await devicesAPI.assignDevice(selectedDeviceId, selectedClient);
+      setShowAssignModal(false);
+      setSelectedClient("");
+      fetchDevices();
+    } catch (err) {
+      setError("Failed to assign device");
+    }
+  };
+
+  const handleToggleStatus = async (deviceId) => {
+    await devicesAPI.toggleStatus(deviceId);
+    fetchDevices();
+  };
 
   if (loading) {
     return (
@@ -127,11 +160,20 @@ const Devices = () => {
                       >
                         IMEI Number
                       </th>
+                      <th 
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Assigned To
+                      </th>
                       <th
                         scope="col"
-                        className="relative py-3.5 pl-3 pr-4 sm:pr-6"
-                      >
-                        <span className="sr-only">Actions</span>
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Status
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        Actions
                       </th>
                     </tr>
                   </thead>
@@ -147,18 +189,46 @@ const Devices = () => {
                       </tr>
                     ) : (
                       devices.map((device) => (
-                        <tr key={device._id}>
+                        <tr key={device._id} className="hover:bg-white/5 transition duration-200">
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-mono text-gray-900 dark:text-gray-100 sm:pl-6">
                             {device.serialNumber}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 dark:text-gray-100">
                             {device.imeiNumber}
                           </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-900 dark:text-gray-100">
+                            {device.assignedClient
+                              ? device.assignedClient.username
+                              : "Not Assigned"}
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => handleToggleStatus(device._id)}
+                              className={`px-2 py-1 rounded text-white ${
+                                device.status === "ON" ? "bg-green-600" : "bg-red-600"
+                              }`}
+                            >
+                              {device.status}
+                            </button>
+                          </td>
                           <td>
                             <button onClick={() => navigate(`/admin/devices/${device._id}/aqi`)}
-                               className="ml-4 inline-flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 border border-transparent font-medium rounded-md text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                               className="ml-4 inline-flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 border border-transparent font-medium rounded-md text-white bg-primary-500 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
                               View AQI
                             </button>
+                            {device.assignedClient ? (
+                              <button
+                                onClick={() => openAssignModal(device._id)}
+                                className="ml-4 inline-flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 border border-transparent font-medium rounded-md text-white bg-yellow-500 hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                Reassign
+                              </button>
+                            ) : (
+                              <button
+                                onClick={() => openAssignModal(device._id)}
+                                className="ml-4 inline-flex items-center text-xs sm:text-sm px-2 sm:px-3 py-1 border border-transparent font-medium rounded-md text-white bg-primary-500 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500">
+                                Assign
+                              </button>
+                            )}
                           </td>
                         </tr>
                       ))
@@ -253,6 +323,43 @@ const Devices = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {showAssignModal && (
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 max-w-md w-full mx-4">
+            <h2 className="text-xl font-semibold mb-4">Assign Device</h2>
+
+            <select
+              className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600  bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border font-mono"
+              value={selectedClient}
+              onChange={(e) => setSelectedClient(e.target.value)}
+            >
+              <option value="">Select Client</option>
+              {clients.map((client) => (
+                <option key={client._id} value={client._id}>
+                  {client.username}
+                </option>
+              ))}
+            </select>
+
+            <div className="mt-6 flex justify-end space-x-3">
+              <button
+                onClick={() => setShowAssignModal(false)}
+                className="px-4 py-2 border rounded"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleAssignDevice}
+                disabled={!selectedClient}
+                className="px-4 py-2 bg-blue-600 text-white rounded disabled:opacity-50"
+              >
+                Assign
+              </button>
+            </div>
           </div>
         </div>
       )}

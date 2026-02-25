@@ -57,6 +57,12 @@ client.on("message", async (topic, message) => {
         return;
       }
       if (command === "SEND_AQI") {
+        const device = await Device.findOne({ serialNumber: targetDevice });
+
+        if (device.status === "OFF") {
+          console.log("Device is OFF. Ignoring command.");
+          return;
+        }
         console.log(`Device ${targetDevice} instructed to send AQI data`);
         simulateDeviceResponse(targetDevice);
       }
@@ -64,7 +70,7 @@ client.on("message", async (topic, message) => {
 
     // DATA CHANNEL (device → server) ///
     if (topic === "aqi/devices/data") {
-      const { serialNumber, imei, pm25, pm10 } = payload;
+      const { serialNumber, imei, aqi } = payload;
       const device = await Device.findOne({ serialNumber });
       if (!device) {
         console.log("Unknown device, ignoring AQI data");
@@ -74,10 +80,12 @@ client.on("message", async (topic, message) => {
         device: device._id,
         serialNumber,
         imei,
-        pm25,
-        pm10,
+        aqi,
       });
       console.log("AQI saved via MQTT:", reading._id);
+      if (global.io) {
+        global.io.emit("newAQI", reading);
+      }
     }
   } catch (err) {
     console.error("MQTT message handling error:", err.message);
@@ -88,9 +96,8 @@ client.on("message", async (topic, message) => {
 function simulateDeviceResponse(deviceSerial) {
   const payload = {
     serialNumber: deviceSerial,
-    imei: "SIMULATED_IMEI",
-    pm25: Math.floor(Math.random() * 50) + 10,
-    pm10: Math.floor(Math.random() * 80) + 20,
+    imei: "IMEI",
+    aqi: Math.floor(Math.random() * 300) + 10,
     timestamp: new Date().toISOString(),
   };
 
@@ -99,7 +106,7 @@ function simulateDeviceResponse(deviceSerial) {
     JSON.stringify(payload),
     () => {
       console.log(
-        `AQI DATA: Device=${payload.serialNumber} PM2.5=${payload.pm25} PM10=${payload.pm10}`
+        `AQI DATA: Device=${payload.serialNumber} AQI=${payload.aqi} `
       );
     }
   );

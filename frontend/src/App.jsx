@@ -8,6 +8,7 @@ import Devices from './pages/admin/Devices';
 import ClientDevices from './pages/client/ClientDevices';
 import Admins from './pages/admin/Admins';
 import AqiDashboard from './pages/admin/AqiDashboard';
+import AdminDashboard from './pages/admin/AdminDashboard';
 
 const AppRoutes = () => {
   const { isAuthenticated, user } = useAuth();
@@ -49,8 +50,15 @@ const AppRoutes = () => {
           </ProtectedRoute>
         }
       />
+      <Route
+        path="/admin/dashboard"
+        element={
+          <ProtectedRoute allowedRoles={["ADMIN"]}>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
 
-      
       {/* Client Routes */}
       <Route
         path="/client/devices"

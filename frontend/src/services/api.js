@@ -119,12 +119,16 @@ export const usersAPI = {
 export const devicesAPI = {
   getAllDevices: () => api.get('/devices'),
   createDevice: (deviceData) => api.post('/devices', deviceData),
+  assignDevice: (deviceId, clientId) => api.put(`/devices/${deviceId}/assign/${clientId}`),
+  toggleStatus: (deviceId) => api.put(`/devices/${deviceId}/status`),
+  readDevice: (deviceId) => api.post(`/devices/${deviceId}/read`),
+  getDashboardStats: () => api.get("/devices/dashboard/stats"),
 };
 
 // AQI API
 export const aqiAPI = {
-  getAqiHistory: (deviceId) =>
-    api.get(`/aqi/${deviceId}`),
+  getAqiHistory: (deviceId) => api.get(`/aqi/${deviceId}`),
+  deleteReading: (readingId) => api.delete(`/aqi/${readingId}`),
 };
 
 

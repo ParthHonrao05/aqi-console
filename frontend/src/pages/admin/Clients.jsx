@@ -10,6 +10,7 @@ const Clients = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [formData, setFormData] = useState({
     username: '',
+    companyName: '',
     email: '',
     password: '',
   });
@@ -40,7 +41,7 @@ const Clients = () => {
     setError('');
 
     // Validate form data
-    if (!formData.username || !formData.email || !formData.password) {
+    if (!formData.username || !formData.companyName || !formData.email || !formData.password) {
       setError('Please fill in all fields');
       setSubmitting(false);
       return;
@@ -55,7 +56,7 @@ const Clients = () => {
     try {
       await usersAPI.createClient(formData);
       setShowCreateModal(false);
-      setFormData({ username: '', email: '', password: '' });
+      setFormData({ username: '', companyName:'', email: '', password: '' });
       setError('');
       await fetchClients();
     } catch (err) {
@@ -132,6 +133,12 @@ const Clients = () => {
                       </th>
                       <th
                         scope="col"
+                        className="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 dark:text-gray-100 sm:pl-6"
+                      >
+                        Company Name
+                      </th>
+                      <th
+                        scope="col"
                         className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900 dark:text-gray-100"
                       >
                         Email
@@ -164,6 +171,9 @@ const Clients = () => {
                         <tr key={client._id}>
                           <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
                             {client.username}
+                          </td>
+                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 dark:text-gray-100 sm:pl-6">
+                            {client.companyName}
                           </td>
                           <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500 dark:text-gray-100">
                             {client.email}
@@ -202,7 +212,7 @@ const Clients = () => {
             )}
             <form onSubmit={handleCreateClient}>
               <div className="space-y-4">
-                <div>
+                <div> {/* Username */}
                   <label
                     htmlFor="username"
                     className="block text-sm font-medium text-gray-700 dark:text-gray-100"
@@ -221,7 +231,24 @@ const Clients = () => {
                     }
                   />
                 </div>
-                <div>
+                <div> {/* Company Name */}
+                  <label
+                    htmlFor="companyName"
+                    className="block text-sm font-medium text-gray-700 dark:text-gray-100"
+                  >
+                    Company Name
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Company Name"
+                    className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600  bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-500 shadow-sm focus:border-primary-500 focus:ring-primary-500 sm:text-sm px-3 py-2 border font-mono"
+                    value={formData.companyName}
+                    onChange={(e) =>
+                      setFormData({ ...formData, companyName: e.target.value })
+                    }
+                  />
+                </div>
+                <div> {/* Email */}
                   <label
                     htmlFor="email"
                     className="block text-sm font-medium text-gray-700 dark:text-gray-100"
@@ -239,7 +266,7 @@ const Clients = () => {
                     }
                   />
                 </div>
-                <div>
+                <div> {/* Password */}
                   <label
                     htmlFor="password"
                     className="block text-sm font-medium text-gray-700 dark:text-gray-100"
@@ -258,7 +285,7 @@ const Clients = () => {
                     }
                   />
                 </div>
-              </div>
+              </div> {/* Button */}
               <div className="mt-6 flex justify-end space-x-3">
                 <button
                   type="button"

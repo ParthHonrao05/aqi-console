@@ -15,6 +15,16 @@ const deviceSchema = new mongoose.Schema({
     unique: true,
     length: 15
   },
+  status: {
+    type: String,
+    enum: ["ON", "OFF"],
+    default: "ON",
+  },
+  assignedClient: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    default: null,
+  }
 }, {
   timestamps: true,
 });
