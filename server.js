@@ -15,7 +15,7 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "https://your-frontend.vercel.app",
+  origin: "https://aqi-console.vercel.app/",
   credentials: true
 }));
 app.use(express.json());
