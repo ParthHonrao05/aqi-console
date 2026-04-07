@@ -45,7 +45,7 @@ const AqiDashboard = () => {
   }, [deviceId]);
 
   useEffect(() => {
-    socket.current = io("http://localhost:5000");
+    socket.current = io("https://aqi-console.onrender.com");
     socket.current.on("connect", () => {
         console.log("Socket connected:", socket.current.id);
     });
