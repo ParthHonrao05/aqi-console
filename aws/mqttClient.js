@@ -4,13 +4,17 @@ const path = require("path");
 const Device = require("../models/Device");
 const AqiReading = require("../models/AqiReading");
 
+const key = Buffer.from(process.env.AWS_PRIVATE_KEY, "base64");
+const cert = Buffer.from(process.env.AWS_CERT, "base64");
+const ca = Buffer.from(process.env.AWS_CA, "base64");
+
 const client = mqtt.connect({
   host: process.env.AWS_IOT_ENDPOINT || "a2ot7xevzwabiz-ats.iot.eu-north-1.amazonaws.com",
   port: 8883,
   protocol: "mqtts",
-  key: fs.readFileSync(path.join(__dirname, "private.pem.key")),
-  cert: fs.readFileSync(path.join(__dirname, "device.pem.crt")),
-  ca: fs.readFileSync(path.join(__dirname, "AmazonRootCA1.pem")),
+  key,
+  cert,
+  ca,
 });
 
 //CONNECT
